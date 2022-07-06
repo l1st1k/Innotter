@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 
 services:
   innotter_db:
@@ -16,7 +16,7 @@ services:
       #PGDATA
 
     ports:
-      - '3306:3306'
+      - '5432:5432'
 
 
   innotter:
