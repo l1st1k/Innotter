@@ -1,31 +1,12 @@
 version: '3.3'
 
 services:
-  innotter_db:
-    container_name: innotter_db
-    image: postgres
-    restart: always
-
-    environment:
-      POSTGRES_DB: example
-      POSTGRES_PASSWORD: example
-      POSTGRES_USER: example
-      #POSTGRES_INITDB_ARGS
-      #POSTGRES_INITDB_WALDIR
-      #POSTGRES_HOST_AUTH_METHOD
-      #PGDATA
-
+  web:
+    build: ./Innotter (Django)
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./Innotter (Django)/:/usr/src/app/
     ports:
-      - '5432:5432'
-
-
-  innotter:
-    container_name: innotter
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    restart: always
-    ports:
-      - '8080:8000'
-    depends_on:
-      - innotter_db
+      - 8000:8000
+    env_file:
+      - Innotter (Django)/.env
