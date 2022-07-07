@@ -71,9 +71,13 @@ WSGI_APPLICATION = 'Innotter.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": config["SQL_ENGINE"],
+        "NAME": config["SQL_DATABASE"],
+        "USER": config["SQL_USER"],
+        "PASSWORD": config["SQL_PASSWORD"],
+        "HOST": config["SQL_HOST"],
+        "PORT": config["SQL_PORT"],
     }
 }
 
