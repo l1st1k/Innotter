@@ -2,4 +2,8 @@
 */.idea
 venv
 */venv
-
+Innotter (Django)/.env
+*/.env
+db.sqlite3
+*/__pycache__/
+Innotter (Django)/Innotter/__pycache__/

@@ -9,24 +9,20 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+from dotenv import dotenv_values
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
+config = dotenv_values("/usr/src/app/.env")
+SECRET_KEY = config["SECRET_KEY"]
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#7*&d&$&kvmw=ec%t75ty*yg-j5ky2&9qqbq-h()0k(0cytb3)'
+DEBUG = int(config["DEBUG"])
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = config["DJANGO_ALLOWED_HOSTS"].split(" ")
 
 # Application definition
 
@@ -69,19 +65,21 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Innotter (Django).wsgi.application'
-
+WSGI_APPLICATION = 'Innotter.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": config["SQL_ENGINE"],
+        "NAME": config["SQL_DATABASE"],
+        "USER": config["SQL_USER"],
+        "PASSWORD": config["SQL_PASSWORD"],
+        "HOST": config["SQL_HOST"],
+        "PORT": config["SQL_PORT"],
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -101,18 +99,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Minsk'
 
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
