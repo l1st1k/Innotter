@@ -13,8 +13,8 @@ class User(AbstractUser):
     role = models.CharField(max_length=9, choices=Roles.choices)
     title = models.CharField(max_length=80)
     is_blocked = models.BooleanField(default=False)
-    followed_pages = models.ManyToManyField('Page.Page', related_name='followed_pages')
-    requested_pages = models.ManyToManyField('Page.Page', related_name='requested_pages')
+    followed_pages = models.ManyToManyField('Page.Page', related_name='followed_pages', null=True, blank=True)
+    requested_pages = models.ManyToManyField('Page.Page', related_name='requested_pages', null=True, blank=True)
 
     class Meta:
         verbose_name = 'User'

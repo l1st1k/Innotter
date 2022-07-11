@@ -1,6 +1,13 @@
 from django.contrib import admin
 from .models import *
 
-admin.site.register(Page)
+
+class PageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'owner', 'is_private')
+    search_fields = ('owner', 'name', 'description')
+    list_editable = ('is_private',)
+    list_filter = ('is_private', 'tags')
+
+
 admin.site.register(Tag)
-# Register your models here.
+admin.site.register(Page, PageAdmin)
