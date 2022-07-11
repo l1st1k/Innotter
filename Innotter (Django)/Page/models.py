@@ -10,9 +10,9 @@ class Tag(models.Model):
 
 class Page(models.Model):
     name = models.CharField(max_length=80, unique=True)
-    uuid = models.CharField(max_length=30, unique=True)
+    uuid = models.UUIDField(max_length=30, unique=True)  # example:3422b448-2460-4fd2-9183-8000de6f8343
     description = models.TextField()
-    tags = models.ManyToManyField('Page.Tag', related_name='tags', blank=True)
+    tags = models.ManyToManyField(Tag, related_name='tags', blank=True)
     owner = models.ForeignKey('User.User', on_delete=models.CASCADE, related_name='pages')
     followers = models.ManyToManyField('User.User', related_name='followers', null=True, blank=True)
     image = models.URLField(null=True, blank=True)
