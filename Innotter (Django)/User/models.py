@@ -10,7 +10,7 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True)
     image_s3_path = models.CharField(max_length=200, null=True, blank=True)
-    role = models.CharField(max_length=9, choices=Roles.choices)
+    role = models.CharField(max_length=9, choices=Roles.choices, default=Roles.USER)
     title = models.CharField(max_length=80)
     is_blocked = models.BooleanField(default=False)
     followed_pages = models.ManyToManyField('Page.Page', related_name='followed_pages', null=True, blank=True)
