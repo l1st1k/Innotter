@@ -23,5 +23,8 @@ class UserAPIViewSet(viewsets.ModelViewSet):
 
     # a method that set permissions depending on http request methods
     def get_permissions(self):
-        self.permission_classes = self.permissions_dict.get(self.action)
-        return super(self.__class__, self).get_permissions()
+        if self.action in self.permissions_dict:
+            perms = self.permissions_dict[self.action]
+        else:
+            perms = []
+        return [permission() for permission in perms]
