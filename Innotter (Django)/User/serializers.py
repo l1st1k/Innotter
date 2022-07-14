@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from User.models import User
+from .utils import block_all_users_pages, unblock_all_users_pages
 
 
 class UserSerializer(serializers.ModelSerializer):
