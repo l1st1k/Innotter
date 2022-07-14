@@ -2,8 +2,7 @@ from User.permissions import *
 from User.serializers import UserSerializer
 from rest_framework import viewsets, renderers, parsers, status
 from rest_framework.authtoken.serializers import AuthTokenSerializer
-from rest_framework.decorators import action
-from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from .utils import *
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
@@ -35,7 +34,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return [permission() for permission in perms]
 
 
-class CreateTokenView(APIView):
+class CreateTokenView(GenericAPIView):
     throttle_classes = ()
     permission_classes = (permissions.AllowAny,)
     parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
@@ -71,7 +70,7 @@ class CreateTokenView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class RefreshTokenView(APIView):
+class RefreshTokenView(GenericAPIView):
     throttle_classes = ()
     permission_classes = (permissions.AllowAny,)
     parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
