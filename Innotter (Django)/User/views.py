@@ -1,8 +1,9 @@
 from User.permissions import *
 from User.serializers import UserSerializer
-from rest_framework import viewsets, renderers, parsers, status, mixins
+from rest_framework import viewsets, renderers, parsers, status
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.decorators import action
+from rest_framework.views import APIView
 from .utils import *
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
@@ -34,14 +35,14 @@ class UserViewSet(viewsets.ModelViewSet):
         return [permission() for permission in perms]
 
 
-class JSONWebTokenAuthViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
+class CreateTokenView(APIView):
     throttle_classes = ()
     permission_classes = (permissions.AllowAny,)
     parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
     renderer_classes = (renderers.JSONRenderer,)
     serializer_class = AuthTokenSerializer
 
-    def create(self, request, **kwargs):
+    def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
@@ -69,8 +70,15 @@ class JSONWebTokenAuthViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
             return response
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(methods=('post',), detail=False)
-    def refresh(self, request):
+
+class RefreshTokenView(APIView):
+    throttle_classes = ()
+    permission_classes = (permissions.AllowAny,)
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
+    renderer_classes = (renderers.JSONRenderer,)
+    serializer_class = AuthTokenSerializer
+
+    def post(self, request):
         refresh_token = request.COOKIES.get(settings.CUSTOM_JWT['AUTH_COOKIE_REFRESH'])
         if refresh_token:
             new_tokens = check_and_update_refresh_token(refresh_token)
