@@ -20,17 +20,12 @@ class JWTAuthenticationMiddleware(MiddlewareMixin):
         request._force_auth_user = self.get_jwt_user(request)
 
     def process_response(self, request, response):
-        if not isinstance(self.get_jwt_user(request), AnonymousUser):
-            if self.get_jwt_user(request).is_blocked:
-                response = Response(
-                    data="You're blocked",
-                    status=status.HTTP_403_FORBIDDEN
-                )
-                response.accepted_renderer = renderers.JSONRenderer()
-                response.accepted_media_type = "application/json"
-                response.renderer_context = {}
-                response.render()
-                return response
+        if self.get_jwt_user(request).is_blocked and (not isinstance(self.get_jwt_user(request), AnonymousUser)):
+            response = Response(
+                data={"error": "You're blocked"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+            return response
         return response
 
     @staticmethod

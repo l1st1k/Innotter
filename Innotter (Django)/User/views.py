@@ -79,25 +79,24 @@ class RefreshTokenView(GenericAPIView):
 
     def post(self, request):
         refresh_token = request.COOKIES.get(settings.CUSTOM_JWT['AUTH_COOKIE_REFRESH'])
-        if refresh_token:
-            new_tokens = check_and_update_refresh_token(refresh_token)
-            if new_tokens:
-                response = Response(new_tokens)
-                response.set_cookie(
-                    key=settings.CUSTOM_JWT['AUTH_COOKIE'],
-                    value=new_tokens[settings.CUSTOM_JWT['AUTH_COOKIE']],
-                    expires=settings.CUSTOM_JWT['ACCESS_TOKEN_LIFETIME'],
-                    secure=settings.CUSTOM_JWT['AUTH_COOKIE_SECURE'],
-                    httponly=settings.CUSTOM_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                    samesite=settings.CUSTOM_JWT['AUTH_COOKIE_SAMESITE']
-                )
-                response.set_cookie(
-                    key=settings.CUSTOM_JWT['AUTH_COOKIE_REFRESH'],
-                    value=new_tokens[settings.CUSTOM_JWT['AUTH_COOKIE_REFRESH']],
-                    expires=settings.CUSTOM_JWT['REFRESH_TOKEN_LIFETIME'],
-                    secure=settings.CUSTOM_JWT['AUTH_COOKIE_SECURE'],
-                    httponly=settings.CUSTOM_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                    samesite=settings.CUSTOM_JWT['AUTH_COOKIE_SAMESITE']
-                )
-                return response
+        new_tokens = check_and_update_refresh_token(refresh_token)
+        if refresh_token and new_tokens:
+            response = Response(new_tokens)
+            response.set_cookie(
+                key=settings.CUSTOM_JWT['AUTH_COOKIE'],
+                value=new_tokens[settings.CUSTOM_JWT['AUTH_COOKIE']],
+                expires=settings.CUSTOM_JWT['ACCESS_TOKEN_LIFETIME'],
+                secure=settings.CUSTOM_JWT['AUTH_COOKIE_SECURE'],
+                httponly=settings.CUSTOM_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                samesite=settings.CUSTOM_JWT['AUTH_COOKIE_SAMESITE']
+            )
+            response.set_cookie(
+                key=settings.CUSTOM_JWT['AUTH_COOKIE_REFRESH'],
+                value=new_tokens[settings.CUSTOM_JWT['AUTH_COOKIE_REFRESH']],
+                expires=settings.CUSTOM_JWT['REFRESH_TOKEN_LIFETIME'],
+                secure=settings.CUSTOM_JWT['AUTH_COOKIE_SECURE'],
+                httponly=settings.CUSTOM_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                samesite=settings.CUSTOM_JWT['AUTH_COOKIE_SAMESITE']
+            )
+            return response
         return Response({'message': "Your token isn't valid"})
