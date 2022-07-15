@@ -4,7 +4,6 @@ from .utils import block_all_users_pages, unblock_all_users_pages
 
 
 class UserSerializer(serializers.ModelSerializer):
-    # role = serializers.CharField(default='user')
     class Meta:
         model = User
         fields = ('username', 'password', 'email', 'title', 'image_s3_path', 'role', 'is_blocked',
