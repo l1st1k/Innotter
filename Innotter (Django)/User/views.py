@@ -3,7 +3,7 @@ from User.serializers import UserSerializer
 from rest_framework import viewsets, renderers, parsers, status
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.generics import GenericAPIView
-from .utils import *
+from .services import *
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 
