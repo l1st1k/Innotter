@@ -24,7 +24,6 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        #
         if validated_data.get('role') == 'admin':
             instance.is_staff = True
             instance.is_superuser = True

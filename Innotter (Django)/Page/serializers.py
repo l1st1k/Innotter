@@ -5,15 +5,15 @@ from Page.models import *
 class PageAdminOrModerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
-        fields = ('username', 'password', 'email', 'title', 'image_s3_path', 'role', 'is_blocked',
-                  'followed_pages', 'requested_pages')
+        fields = ('id', 'name', 'uuid', 'description', 'tags', 'owner', 'followers',
+                  'image', 'is_private', 'follow_requests', 'liked_posts', 'unblock_date')
 
 
 class PageUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
-        fields = ('username', 'password', 'email', 'title', 'image_s3_path', 'role', 'is_blocked',
-                  'followed_pages', 'requested_pages')
+        fields = ('id', 'name', 'uuid', 'description', 'tags', 'owner', 'followers',
+                  'image', 'is_private', 'follow_requests', 'liked_posts', 'unblock_date')
 
 
 class TagModelSerializer(serializers.ModelSerializer):
