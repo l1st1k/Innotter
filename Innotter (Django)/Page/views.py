@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from .permissions import *
 from .serializers import *
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
+from rest_framework.response import Response
 
 
 class PageViewSet(viewsets.ModelViewSet):
@@ -29,6 +30,16 @@ class PageViewSet(viewsets.ModelViewSet):
             perms = []
         return [permission() for permission in perms]
 
+    def check_permissions(self, request):
+        try:
+            obj = Page.objects.get(id=self.kwargs.get('pk'))
+        except Page.DoesNotExist:  # exception when 'get' request on /pages/
+            return Response({'message': 'Not found'}, status.HTTP_404_NOT_FOUND)
+        else:
+            self.check_object_permissions(request, obj)
+        finally:
+            return super().check_permissions(request)
+
     def get_serializer_class(self):
         if self.request.user.role in (User.Roles.ADMIN, User.Roles.MODERATOR):
             self.serializer_class = PageAdminOrModerSerializer
@@ -45,7 +56,10 @@ class PageViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=('get',))
     def followers(self, request, pk=None):
         # 'get' return a list of followers
-        pass
+        page = self.get_object()
+        self.check_permissions(request)
+        self.check_object_permissions(request, page)
+
 
     @action(detail=True, methods=('post',))
     def follow(self, request, pk=None):
@@ -55,6 +69,7 @@ class PageViewSet(viewsets.ModelViewSet):
 
 class TagViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.RetrieveModelMixin,
                  mixins.ListModelMixin):
+    """ViewSet for all Tag objects"""
     queryset = Tag.objects.all()
     serializer_class = TagModelSerializer
     permission_classes = ()

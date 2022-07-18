@@ -18,7 +18,8 @@ class IsAdminOrModerator(permissions.BasePermission):
 
 class PageIsPublicOrOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return PageIsPublic(self, request, view, obj) or IsPageOwner(self, request, view, obj)
+        return PageIsPublic.has_object_permission(self, request, view, obj)\
+               or IsPageOwner.has_object_permission(self, request, view, obj)
 
 
 class IsPageOwner(permissions.BasePermission):
