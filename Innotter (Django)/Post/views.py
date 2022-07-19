@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .services import *
 from Page.permissions import *
 from .models import Post
+from Page.models import Page
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -18,7 +19,7 @@ class PostViewSet(viewsets.ModelViewSet):
         'update': (permissions.IsAuthenticated, IsPageOwnerOrModeratorOrAdmin, PageIsntBlocked),
         'destroy': (permissions.IsAuthenticated, IsPageOwnerOrModeratorOrAdmin),
         'retrieve': (permissions.IsAuthenticated, PageIsPublicOrFollowerOrOwnerOrModeratorOrAdmin, PageIsntBlocked),
-        'like': (permissions.IsAuthenticated, PageIsPublicOrFollowerOrOwnerOrModeratorOrAdmin, PageIsntBlocked),
+        'like': (permissions.IsAuthenticated, PageIsPublicOrFollowerOrOwnerOrModeratorOrAdmin, PageIsntBlocked)
     }
 
     # a method that set permissions depending on http request methods
@@ -29,13 +30,17 @@ class PostViewSet(viewsets.ModelViewSet):
             perms = []
         return [permission() for permission in perms]
 
-    # def check_permissions(self, request):
-    #     obj = Page.objects.get(id=self.kwargs.get('parent_lookup_page_id'))
-    #     self.check_object_permissions(request, obj)
-    #     return super().check_permissions(request)
+    def check_permissions(self, request):
+        """
+        Checking all the permissions according to the parent Page
+        """
+        post = self.get_object()
+        parent_page = Page.objects.get(id=post.page)
+        self.check_object_permissions(request, parent_page)
+        return super().check_permissions(request)
 
-    # def get_object(self):
-    #     return Post.objects.get(pk=self.kwargs['pk'])
+    def get_object(self):
+        return Post.objects.get(pk=self.kwargs['pk'])
 
     @action(detail=True, methods=('post',))
     def like(self, request):
