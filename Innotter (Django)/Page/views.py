@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from .permissions import *
 from .serializers import *
 from .services import add_follow_requests_to_request_data, user_is_in_page_follow_requests_or_followers,\
@@ -54,8 +53,11 @@ class PageViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=('get', 'post'))
     def follow_requests(self, request, pk=None):
-        # 'get' returns list of requests
-        # 'post' updates list of requests (maybe should be 'patch')
+        """
+        'GET' returns list of requests 'POST' updates list of requests (according to accepted or denied requests)
+
+        Send one of 2 parameters: {"accept_ids": [0,1,2,3]} or {"deny_ids": [0,1,2,3]}
+        """
         page = self.get_object()
         self.check_permissions(request)
         self.check_object_permissions(request, page)
@@ -85,6 +87,11 @@ class PageViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=('post',))
     def follow(self, request, pk=None):
+        """
+        'POST' following or sending a follow_request
+
+        No data required there. Just send {}
+        """
         # 'post' adding current user to the list of request of followers(in case of public page)
         page = self.get_object()
         self.check_permissions(request)

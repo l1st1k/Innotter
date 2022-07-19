@@ -38,3 +38,18 @@ class PageIsntBlocked(permissions.BasePermission):
         if obj.unblock_date:
             return is_page_unblocked(obj.unblock_date)
         return IsAdminOrModerator.has_permission(self, request, view)
+
+
+class UserIsFollower(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.id in request.user.followed_pages
+
+
+class PageIsPublicOrFollowerOrOwnerOrModeratorOrAdmin(permissions.BasePermission):
+    """
+    Page is public  OR  User is follower  OR  User is owner  OR   User is admin or moderator
+    """
+    def has_object_permission(self, request, view, obj):
+        return PageIsPublic.has_permission(self, request, view)\
+               or IsPageOwnerOrModeratorOrAdmin.has_object_permission(self, request, view, obj)\
+               or UserIsFollower.has_object_permission(self, request, view, obj)

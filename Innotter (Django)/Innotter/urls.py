@@ -38,10 +38,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/user/', include('User.urls')),
     path('api/v1/page/', include('Page.urls')),
+    path('api/v1/post/', include('Post.urls')),
+
+    # JWT token urls
     path('api/v1/token/create/', CreateTokenView.as_view(), name='token_create'),
     path('api/v1/token/refresh/', RefreshTokenView.as_view(), name='token_refresh'),
 
-    #  swagger urls
+    # Swagger urls
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
