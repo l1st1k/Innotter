@@ -28,6 +28,27 @@ class PageUserSerializer(serializers.ModelSerializer):
         read_only_fields = ('unblock_date', 'owner')
 
 
+class PageModelFollowRequestsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Page
+        fields = ('follow_requests', 'followers')
+
+    def update(self, instance, validated_data):
+        # updating accepted requests
+        if validated_data.get('accept_ids', False):
+            instance.followers.add(*validated_data['accept_ids'])
+            if instance.follow_requests:
+                instance.follow_requests.remove(*validated_data['accept_ids'])
+            instance.save()
+            return instance
+
+        # updating denied requests
+        if validated_data.get('deny_ids', False) and instance.follow_requests:
+            instance.follow_requests.remove(*validated_data['deny_ids'])
+            instance.save()
+            return instance
+
+
 class TagModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
