@@ -35,11 +35,12 @@ class PostViewSet(viewsets.ModelViewSet):
         Checking all the permissions according to the parent Page
         """
         post = self.get_object()
-        parent_page = Page.objects.get(id=post.page)
+        parent_page = Page.objects.get(id=post.page.id)
         self.check_object_permissions(request, parent_page)
         return super().check_permissions(request)
 
     def get_object(self):
+        # if self.action not in ('list', 'create'):
         return Post.objects.get(pk=self.kwargs['pk'])
 
     @action(detail=True, methods=('post',))
