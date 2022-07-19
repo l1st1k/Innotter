@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from .permissions import *
 from .serializers import *
-from .services import add_follow_requests_to_request_data
+from .services import add_follow_requests_to_request_data, user_is_in_page_follow_requests_or_followers,\
+                        add_user_to_page_follow_requests, add_user_to_page_followers
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -82,11 +83,24 @@ class PageViewSet(viewsets.ModelViewSet):
         serializer = PageModelFollowRequestsSerializer(page)
         return Response({'followers': serializer.data['followers']}, status.HTTP_200_OK)
 
-
-    # @action(detail=True, methods=('post',))
-    # def follow(self, request, pk=None):
-    #     # 'post' adding current user to the list of request of followers(in case of public page)
-    #     pass
+    @action(detail=True, methods=('post',))
+    def follow(self, request, pk=None):
+        # 'post' adding current user to the list of request of followers(in case of public page)
+        page = self.get_object()
+        self.check_permissions(request)
+        self.check_object_permissions(request, self.get_object())
+        # 'already sent' case
+        if user_is_in_page_follow_requests_or_followers(request.user, page):
+            return Response({"message": "You are already sent follow request"}, status.HTTP_400_BAD_REQUEST)
+        # 'new follow_request' case
+        if page.is_private:
+            add_user_to_page_follow_requests(request.user, page)
+            page.save()
+            return Response({'message': 'Your follow request successfully sent!'}, status.HTTP_200_OK)
+        else:
+            add_user_to_page_followers(request.user, page)
+            page.save()
+            return Response({'message': 'Successfully followed!'}, status.HTTP_200_OK)
 
 
 class TagViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.RetrieveModelMixin,
