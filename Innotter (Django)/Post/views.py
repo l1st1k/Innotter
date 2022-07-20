@@ -63,8 +63,19 @@ class PostViewSet(viewsets.ModelViewSet):
         return Response({'message': 'You are not the owning this page!'}, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(detail=True, methods=('post',))
-    def like(self, request):
+    def like(self, request, *args, **kwargs):
+        """
+        'POST' likes chosen post with one of your pages
+
+        Send 1 parameter: {"page_id": _ }
+        """
+        like_data = request.data
+        page_id = like_data.get('page_id', None)
+        if page_id is None:
+            return Response({'message': 'You need to send {"page_id": _ } parameter'}, status.HTTP_406_NOT_ACCEPTABLE)
+        if foreign_page(request.user, page_id):
+            return Response({'message': 'You cant like from another users pages! '}, status.HTTP_406_NOT_ACCEPTABLE)
         post = self.get_object()
         self.check_permissions(request)
-        add_like_to_post(request, post)
+        add_like_to_post(page_id, post)
         return Response({'message': 'Successfully liked!'}, status.HTTP_200_OK)
