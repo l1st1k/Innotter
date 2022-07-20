@@ -19,7 +19,7 @@ from User.views import CreateTokenView, RefreshTokenView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-
+from Post.views import FeedViewSet
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -39,6 +39,7 @@ urlpatterns = [
     path('api/v1/user/', include('User.urls')),
     path('api/v1/page/', include('Page.urls')),
     path('api/v1/post/', include('Post.urls')),
+    path('api/v1/feed/', FeedViewSet.as_view({'get': 'list'}), name='feed'),
 
     # JWT token urls
     path('api/v1/token/create/', CreateTokenView.as_view(), name='token_create'),

@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from .serializers import PostModelSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -6,6 +6,7 @@ from .services import *
 from Page.permissions import *
 from .models import Post
 from Page.models import Page
+from django.db.models import Q
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -79,3 +80,14 @@ class PostViewSet(viewsets.ModelViewSet):
         self.check_permissions(request)
         add_like_to_post(page_id, post)
         return Response({'message': 'Successfully liked!'}, status.HTTP_200_OK)
+
+
+class FeedViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+    serializer_class = PostModelSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        queryset = (Post.objects.prefetch_related('page__followers').filter(
+            Q(page__followers=self.request.user) |
+            Q(page__owner=self.request.user)).distinct())
+        return queryset
