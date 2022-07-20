@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from Post.serializers import PostModelSerializer
 from Post.models import Post
+import django_filters.rest_framework
 
 
 class PageViewSet(viewsets.ModelViewSet):
@@ -151,3 +152,11 @@ class TagViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Destro
         else:
             perms = []
         return [permission() for permission in perms]
+
+
+class SearchPageViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+    serializer_class = PageUserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Page.objects.all()
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filterset_fields = ('name', 'uuid', 'tags')

@@ -1,12 +1,12 @@
 from User.permissions import *
 from User.serializers import UserSerializer
-from rest_framework import viewsets, renderers, parsers, status
+from rest_framework import viewsets, renderers, parsers, status, mixins
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.generics import GenericAPIView
 from .services import *
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
-
+import django_filters.rest_framework
 
 User = get_user_model()
 
@@ -100,3 +100,11 @@ class RefreshTokenView(GenericAPIView):
             )
             return response
         return Response({'message': "Your token isn't valid"})
+
+
+class SearchUserViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = User.objects.all()
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filterset_fields = ('username', 'email')

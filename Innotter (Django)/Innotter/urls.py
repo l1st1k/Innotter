@@ -20,6 +20,8 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from Post.views import FeedViewSet
+from User.views import SearchUserViewSet
+from Page.views import SearchPageViewSet
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -40,6 +42,8 @@ urlpatterns = [
     path('api/v1/page/', include('Page.urls')),
     path('api/v1/post/', include('Post.urls')),
     path('api/v1/feed/', FeedViewSet.as_view({'get': 'list'}), name='feed'),
+    path('api/v1/search/user/', SearchUserViewSet.as_view({'get': 'list'}), name='search-user'),
+    path('api/v1/search/page/', SearchPageViewSet.as_view({'get': 'list'}), name='search-page'),
 
     # JWT token urls
     path('api/v1/token/create/', CreateTokenView.as_view(), name='token_create'),
