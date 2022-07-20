@@ -5,6 +5,8 @@ from .services import add_follow_requests_to_request_data, user_is_in_page_follo
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from Post.serializers import PostModelSerializer
+from Post.models import Post
 
 
 class PageViewSet(viewsets.ModelViewSet):
@@ -20,7 +22,8 @@ class PageViewSet(viewsets.ModelViewSet):
         'retrieve': (permissions.IsAuthenticated, PageIsPublicOrOwner, PageIsntBlocked),
         'follow_requests': (permissions.IsAuthenticated, IsPageOwnerOrModeratorOrAdmin),
         'followers': (permissions.IsAuthenticated, IsPageOwnerOrModeratorOrAdmin, PageIsntBlocked),
-        'follow': (permissions.IsAuthenticated, PageIsntBlocked)
+        'follow': (permissions.IsAuthenticated, PageIsntBlocked),
+        'posts': (permissions.IsAuthenticated, PageIsntBlocked, PageIsPublicOrFollowerOrOwnerOrModeratorOrAdmin)
     }
 
     # a method that set permissions depending on http request methods
@@ -78,7 +81,11 @@ class PageViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=('get',))
     def followers(self, request, pk=None):
-        # 'get' returns list of followers
+        """
+        'GET' returns list of followers for chosen page
+
+        No parameters there
+        """
         page = self.get_object()
         self.check_permissions(request)
         self.check_object_permissions(request, page)
@@ -108,6 +115,20 @@ class PageViewSet(viewsets.ModelViewSet):
             add_user_to_page_followers(request.user, page)
             page.save()
             return Response({'message': 'Successfully followed!'}, status.HTTP_200_OK)
+
+    @action(detail=True, methods=('get',))
+    def posts(self, request, pk=None):
+        """
+        'GET' returns list of posts for chosen page
+
+        No parameters there
+        """
+        page = self.get_object()
+        self.check_permissions(request)
+        self.check_object_permissions(request, page)
+        query = Post.objects.filter(page=page)
+        post_serializer = PostModelSerializer(query, many=True)
+        return Response({'posts': post_serializer.data}, status.HTTP_200_OK)
 
 
 class TagViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.RetrieveModelMixin,
