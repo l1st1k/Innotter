@@ -13,8 +13,8 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = ()
     queryset = Post.objects.all()
     permissions_dict = {
-        'list': (permissions.IsAuthenticated, PageIsPublic, PageIsntBlocked),
-        'create': (permissions.IsAuthenticated, IsPageOwner),
+        'list': (permissions.IsAuthenticated,),  # also got some permit checks in get_query
+        'create': (permissions.IsAuthenticated,),  # overloaded below
         'partial_update': (permissions.IsAuthenticated, IsPageOwnerOrModeratorOrAdmin, PageIsntBlocked),
         'update': (permissions.IsAuthenticated, IsPageOwnerOrModeratorOrAdmin, PageIsntBlocked),
         'destroy': (permissions.IsAuthenticated, IsPageOwnerOrModeratorOrAdmin),
@@ -34,14 +34,33 @@ class PostViewSet(viewsets.ModelViewSet):
         """
         Checking all the permissions according to the parent Page
         """
-        post = self.get_object()
-        parent_page = Page.objects.get(id=post.page.id)
-        self.check_object_permissions(request, parent_page)
+        if self.kwargs.get('pk', False):
+            post = self.get_object()
+            parent_page = Page.objects.get(id=post.page.id)
+            self.check_object_permissions(request, parent_page)
         return super().check_permissions(request)
 
     def get_object(self):
-        # if self.action not in ('list', 'create'):
         return Post.objects.get(pk=self.kwargs['pk'])
+
+    def get_queryset(self):
+        query = Post.objects.all()
+        if self.action == 'list':
+            return [post for post in query if user_is_able_to_see_the_post(self.request.user, post)]
+        return query
+
+    def create(self, request, *args, **kwargs):
+        post_data = request.data
+        if user_is_page_owner(request.user, post_data['page']):
+            page = Page.objects.get(pk=post_data['page'])
+            replied_post = None
+            if post_data.get('reply_to', False):
+                replied_post = Post.objects.get(pk=post_data['reply_to'])
+            new_post = Post.objects.create(page=page, content=post_data['content'], reply_to=replied_post)
+            new_post.save()
+            serializer = PostModelSerializer(new_post)
+            return Response(serializer.data)
+        return Response({'message': 'You are not the owning this page!'}, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(detail=True, methods=('post',))
     def like(self, request):

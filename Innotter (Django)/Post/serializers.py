@@ -16,4 +16,6 @@ class PostModelSerializer(serializers.ModelSerializer):
         """
         Counting amount of likes
         """
+        if Post.objects.values('pages_that_liked').filter(id=obj.id).first()['pages_that_liked'] is None:
+            return 0
         return len(Post.objects.values('pages_that_liked').filter(id=obj.id))
