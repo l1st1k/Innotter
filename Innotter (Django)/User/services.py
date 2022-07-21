@@ -6,14 +6,17 @@ from django.utils import timezone
 
 from Innotter import settings
 from User.models import RefreshToken
+from Page.models import Page
 
 
 def unblock_all_users_pages(user):
-    pass
+    unblock_date = timezone.now()
+    Page.objects.filter(owner=user).update(unblock_date=unblock_date)
 
 
 def block_all_users_pages(user):
-    pass
+    unblock_date = timezone.make_aware(timezone.datetime.max, timezone.get_default_timezone())
+    Page.objects.filter(owner=user).update(unblock_date=unblock_date)
 
 
 def generate_access_token(user):

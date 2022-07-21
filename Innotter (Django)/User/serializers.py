@@ -8,7 +8,7 @@ from .services import block_all_users_pages, unblock_all_users_pages
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'password', 'email', 'title', 'image_s3_path', 'role', 'is_blocked',
+        fields = ('id', 'username', 'password', 'email', 'title', 'image_s3_path', 'role', 'is_blocked',
                   'followed_pages', 'requested_pages')
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
             role='user',
             title=validated_data['title'],
             is_blocked=False,
-            # image_s3_path=validated_data['image_s3_path']
+            image_s3_path=validated_data['image_s3_path']
         )
         user.set_password(validated_data['password'])
         user.save()
@@ -34,9 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
             instance.save()
             validated_data.pop('password')
         if validated_data.get('is_blocked'):
-            pass
-            # block_all_users_pages(instance)
+            block_all_users_pages(instance)
         elif not validated_data.get('is_blocked'):
-            pass
-            # unblock_all_users_pages(instance)
+            unblock_all_users_pages(instance)
         return instance
