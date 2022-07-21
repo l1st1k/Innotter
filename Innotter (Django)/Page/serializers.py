@@ -50,4 +50,4 @@ class PageModelFollowRequestsSerializer(serializers.ModelSerializer):
 class TagModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ('name',)
+        fields = '__all__'

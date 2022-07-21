@@ -5,15 +5,18 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
 from Innotter import settings
+from Page.models import Page
 from User.models import RefreshToken
 
 
 def unblock_all_users_pages(user):
-    pass
+    unblock_date = timezone.now()
+    Page.objects.filter(owner=user).update(unblock_date=unblock_date)
 
 
 def block_all_users_pages(user):
-    pass
+    unblock_date = timezone.make_aware(timezone.datetime.max, timezone.get_default_timezone())
+    Page.objects.filter(owner=user).update(unblock_date=unblock_date)
 
 
 def generate_access_token(user):
