@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from User.models import User
-
+from .models import User
 from .services import block_all_users_pages, unblock_all_users_pages
 
 
