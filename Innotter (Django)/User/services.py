@@ -5,8 +5,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
 from Innotter import settings
-from User.models import RefreshToken
 from Page.models import Page
+from User.models import RefreshToken
 
 
 def unblock_all_users_pages(user):

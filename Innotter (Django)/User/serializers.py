@@ -11,6 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'password', 'email', 'title', 'image_s3_path', 'role', 'is_blocked',
                   'followed_pages', 'requested_pages')
         extra_kwargs = {'password': {'write_only': True}}
+        read_only_fields = ('followed_pages', 'requested_pages')
 
     def create(self, validated_data):
         user = User(
@@ -26,15 +27,20 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        if validated_data.get('role') == 'admin':
+        instance.username = validated_data.get('username', instance.username)
+        instance.password = validated_data.get('password', instance.password)
+        # validated_data.pop('password')
+        instance.email = validated_data.get('email', instance.email)
+        instance.title = validated_data.get('title', instance.title)
+        instance.image_s3_path = validated_data.get('image_s3_path', instance.image_s3_path)
+        instance.role = validated_data.get('role', instance.role)
+        instance.is_blocked = validated_data.get('is_blocked', instance.is_blocked)
+        instance.save()
+        if instance.role == 'admin':
             instance.is_staff = True
             instance.is_superuser = True
-        if validated_data.get('password'):
-            instance.set_password(validated_data['password'])
-            instance.save()
-            validated_data.pop('password')
-        if validated_data.get('is_blocked'):
+        if instance.is_blocked:
             block_all_users_pages(instance)
-        elif not validated_data.get('is_blocked'):
+        else:
             unblock_all_users_pages(instance)
         return instance
