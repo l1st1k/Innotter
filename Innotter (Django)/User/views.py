@@ -1,12 +1,14 @@
-from User.permissions import *
-from User.serializers import UserSerializer
-from rest_framework import viewsets, renderers, parsers, status, mixins
+import django_filters.rest_framework
+from django.contrib.auth import get_user_model
+from rest_framework import mixins, parsers, renderers, status, viewsets
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.generics import GenericAPIView
-from .services import *
-from django.contrib.auth import get_user_model
 from rest_framework.response import Response
-import django_filters.rest_framework
+
+from User.permissions import *
+from User.serializers import UserSerializer
+
+from .services import *
 
 User = get_user_model()
 

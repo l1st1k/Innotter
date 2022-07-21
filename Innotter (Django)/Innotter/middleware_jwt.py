@@ -1,16 +1,14 @@
-import jwt
 import traceback
 
-
-from django.utils.deprecation import MiddlewareMixin
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
+import jwt
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.middleware import get_user
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.deprecation import MiddlewareMixin
+from rest_framework import renderers, status
 from rest_framework.response import Response
-from rest_framework import status, renderers
-
 
 User = get_user_model()
 

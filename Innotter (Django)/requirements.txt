@@ -27,3 +27,4 @@ sqlparse==0.4.2
 uritemplate==4.1.1
 urllib3==1.25.8
 PyJWT==2.4.0
+isort==5.10.1

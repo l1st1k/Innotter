@@ -1,13 +1,17 @@
-from .permissions import *
-from .serializers import *
-from .services import add_follow_requests_to_request_data, user_is_in_page_follow_requests_or_followers,\
-                        add_user_to_page_follow_requests, add_user_to_page_followers
-from rest_framework import viewsets, mixins, status
+import django_filters.rest_framework
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from Post.serializers import PostModelSerializer
+
 from Post.models import Post
-import django_filters.rest_framework
+from Post.serializers import PostModelSerializer
+
+from .permissions import *
+from .serializers import *
+from .services import (add_follow_requests_to_request_data,
+                       add_user_to_page_follow_requests,
+                       add_user_to_page_followers,
+                       user_is_in_page_follow_requests_or_followers)
 
 
 class PageViewSet(viewsets.ModelViewSet):

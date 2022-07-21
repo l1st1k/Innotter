@@ -1,7 +1,9 @@
 import datetime
+
+import jwt
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
-import jwt
+
 from Innotter import settings
 from User.models import RefreshToken
 

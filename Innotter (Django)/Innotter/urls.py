@@ -14,14 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path, include
-from User.views import CreateTokenView, RefreshTokenView
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
+from django.urls import include, path, re_path
 from drf_yasg import openapi
-from Post.views import FeedViewSet
-from User.views import SearchUserViewSet
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+
 from Page.views import SearchPageViewSet
+from Post.views import FeedViewSet
+from User.views import CreateTokenView, RefreshTokenView, SearchUserViewSet
 
 schema_view = get_schema_view(
    openapi.Info(
