@@ -40,14 +40,11 @@ class PageModelFollowRequestsSerializer(serializers.ModelSerializer):
             instance.followers.add(*validated_data['accept_ids'])
             if instance.follow_requests:
                 instance.follow_requests.remove(*validated_data['accept_ids'])
-            instance.save()
-            return instance
-
         # updating denied requests
         if validated_data.get('deny_ids', False) and instance.follow_requests:
             instance.follow_requests.remove(*validated_data['deny_ids'])
-            instance.save()
-            return instance
+        instance.save()
+        return instance
 
 
 class TagModelSerializer(serializers.ModelSerializer):

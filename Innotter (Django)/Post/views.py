@@ -47,7 +47,7 @@ class PostViewSet(viewsets.ModelViewSet):
         return Post.objects.get(pk=self.kwargs['pk'])
 
     def get_queryset(self):
-        query = Post.objects.all()
+        query = Post.objects.select_related('page').all()
         if self.action == 'list':
             return [post for post in query if user_is_able_to_see_the_post(self.request.user, post)]
         return query
@@ -63,7 +63,7 @@ class PostViewSet(viewsets.ModelViewSet):
             new_post.save()
             serializer = PostModelSerializer(new_post)
             return Response(serializer.data)
-        return Response({'message': 'You are not the owning this page!'}, status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response({'message': 'You are not the owner of this page!'}, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(detail=True, methods=('post',))
     def like(self, request, *args, **kwargs):
@@ -72,9 +72,8 @@ class PostViewSet(viewsets.ModelViewSet):
 
         Send 1 parameter: {"page_id": _ }
         """
-        like_data = request.data
-        page_id = like_data.get('page_id', None)
-        if page_id is None:
+        page_id = request.data.get('page_id', None)
+        if not page_id:
             return Response({'message': 'You need to send {"page_id": _ } parameter'}, status.HTTP_406_NOT_ACCEPTABLE)
         if foreign_page(request.user, page_id):
             return Response({'message': 'You cant like from another users pages! '}, status.HTTP_406_NOT_ACCEPTABLE)

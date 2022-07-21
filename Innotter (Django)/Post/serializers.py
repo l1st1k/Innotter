@@ -8,7 +8,8 @@ class PostModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'page', 'content', 'reply_to', 'created_at', 'updated_at', 'pages_that_liked', 'likes')
+        fields = '__all__'
+        extra_fields = ['likes']
         extra_kwargs = {
             'pages_that_liked': {'read_only': True},
         }
@@ -17,6 +18,4 @@ class PostModelSerializer(serializers.ModelSerializer):
         """
         Counting amount of likes
         """
-        if Post.objects.values('pages_that_liked').filter(id=obj.id).first()['pages_that_liked'] is None:
-            return 0
-        return len(Post.objects.values('pages_that_liked').filter(id=obj.id))
+        return obj.pages_that_liked.count()

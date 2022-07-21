@@ -67,6 +67,7 @@ class PageViewSet(viewsets.ModelViewSet):
         Send one of 2 parameters: {"accept_ids": [0,1,2,3]} or {"deny_ids": [0,1,2,3]}
         """
         page = self.get_object()
+        response = None
         self.check_permissions(request)
         self.check_object_permissions(request, page)
         if page.is_private:
@@ -78,11 +79,12 @@ class PageViewSet(viewsets.ModelViewSet):
                 # that allow user write only new follow_requests in request.data
                 add_follow_requests_to_request_data(request.data, page.follow_requests)
                 serializer = PageModelFollowRequestsSerializer(data=request.data)
-                if serializer.is_valid():
-                    serializer.update(page, request.data)
-                    return Response({'message': 'Ok'}, status.HTTP_200_OK)
-                return Response({'message': 'Your data is not valid'}, status.HTTP_400_BAD_REQUEST)
-        return Response({"message": "Your page isn't private"}, status.HTTP_400_BAD_REQUEST)
+                serializer.is_valid(raise_exception=True)
+                serializer.update(page, request.data)
+                response = Response({'message': 'Success!'}, status.HTTP_200_OK)
+        else:
+            response = Response({"message": "Your page isn't private"}, status.HTTP_400_BAD_REQUEST)
+        return response
 
     @action(detail=True, methods=('get',))
     def followers(self, request, pk=None):
@@ -116,10 +118,10 @@ class PageViewSet(viewsets.ModelViewSet):
             add_user_to_page_follow_requests(request.user, page)
             page.save()
             return Response({'message': 'Your follow request successfully sent!'}, status.HTTP_200_OK)
-        else:
-            add_user_to_page_followers(request.user, page)
-            page.save()
-            return Response({'message': 'Successfully followed!'}, status.HTTP_200_OK)
+        # public page case
+        add_user_to_page_followers(request.user, page)
+        page.save()
+        return Response({'message': 'Successfully followed!'}, status.HTTP_200_OK)
 
     @action(detail=True, methods=('get',))
     def posts(self, request, pk=None):

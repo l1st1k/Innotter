@@ -19,13 +19,13 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = []
     permissions_dict = {
-                        'partial_update': (permissions.IsAuthenticated, IsUserOwnerOrAdmin),
-                        'update': (permissions.IsAuthenticated, IsUserOwnerOrAdmin),
-                        'destroy': (permissions.IsAuthenticated, IsUserOwnerOrAdmin),
-                        'create': (permissions.AllowAny,),
-                        'list': (permissions.IsAuthenticated, IsAdmin,),
-                        'retrieve': (permissions.IsAuthenticated,),
-                        }
+        'partial_update': (permissions.IsAuthenticated, IsUserOwnerOrAdmin),
+        'update': (permissions.IsAuthenticated, IsUserOwnerOrAdmin),
+        'destroy': (permissions.IsAuthenticated, IsUserOwnerOrAdmin),
+        'create': (permissions.AllowAny,),
+        'list': (permissions.IsAuthenticated, IsAdmin,),
+        'retrieve': (permissions.IsAuthenticated,),
+    }
 
     # a method that set permissions depending on http request methods
     def get_permissions(self):
