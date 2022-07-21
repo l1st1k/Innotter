@@ -12,6 +12,9 @@ services:
       - Innotter (Django)/.env
     depends_on:
       - db
+    stdin_open: true
+    tty: true
+
   db:
     image: postgres:12.0-alpine
     volumes:
