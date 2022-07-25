@@ -50,7 +50,7 @@ class UserViewSet(viewsets.ModelViewSet):
             ALLOWABLE_IMAGE_FORMATS = ('png', 'jpeg', 'jpg')
             img_format = image.name.split('.')[-1]
             if img_format in ALLOWABLE_IMAGE_FORMATS:
-                image.name = f'{user.pk}_{datetime.datetime.now().date()}.{img_format}'
+                image.name = f'user_{user.pk}_{datetime.datetime.now().date()}.{img_format}'
                 s3_url = upload_image_to_s3(image)
                 user.image_s3_path = s3_url
                 user.save()
