@@ -26,7 +26,7 @@ class UserViewSet(viewsets.ModelViewSet):
         'create': (permissions.AllowAny,),
         'list': (permissions.IsAuthenticated, IsAdmin,),
         'retrieve': (permissions.IsAuthenticated,),
-        'image': (permissions.IsAuthenticated, IsUserOwner,)
+        'image': (permissions.IsAuthenticated, IsUserOwnerOrAdmin,)
     }
 
     # a method that set permissions depending on http request methods
@@ -37,26 +37,32 @@ class UserViewSet(viewsets.ModelViewSet):
             perms = []
         return [permission() for permission in perms]
 
-    @action(detail=True, methods=('post',))
+    @action(detail=True, methods=('post', 'get'))
     def image(self, request, pk=None):
         """
-        'POST' sets new user's image
+        'POST' uploads new user's image, 'GET' returns link for the image
 
         No parameters there, only file with avatar. Image should be in 'jpg' or 'png' format.
         """
         user = self.get_object()
-        image = request.data['upload']
-        ALLOWABLE_IMAGE_FORMATS = ('png', 'jpeg', 'jpg')
-        img_format = image.name.split('.')[-1]
-        if img_format in ALLOWABLE_IMAGE_FORMATS:
-            image.name = f'{user.pk}_{datetime.datetime.now().date()}.{img_format}'
-            s3_url = upload_image_to_s3(image)
-            user.image_s3_path = s3_url
-            user.save()
-            response = Response({"message": "Successfully uploaded!", "S3 URL": s3_url}, status.HTTP_200_OK)
-        else:
-            response = Response({"message": "Image should be in ('.png', '.jpeg', '.jpg') format!"},
-                                status.HTTP_400_BAD_REQUEST)
+        if request.method == "POST":
+            image = request.data['upload']
+            ALLOWABLE_IMAGE_FORMATS = ('png', 'jpeg', 'jpg')
+            img_format = image.name.split('.')[-1]
+            if img_format in ALLOWABLE_IMAGE_FORMATS:
+                image.name = f'{user.pk}_{datetime.datetime.now().date()}.{img_format}'
+                s3_url = upload_image_to_s3(image)
+                user.image_s3_path = s3_url
+                user.save()
+                response = Response({"message": "Successfully uploaded!", "S3 URL": s3_url}, status.HTTP_200_OK)
+            else:
+                response = Response({"message": "Image should be in ('.png', '.jpeg', '.jpg') format!"},
+                                    status.HTTP_400_BAD_REQUEST)
+        elif request.method == 'GET':
+            if user.image_s3_path:
+                response = Response({"message": "Success!", "S3 URL": user.image_s3_path}, status.HTTP_200_OK)
+            else:
+                response = Response({"message": "There is no image for this user :("}, status.HTTP_400_BAD_REQUEST)
         return response
 
 
