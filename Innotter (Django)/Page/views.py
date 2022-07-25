@@ -1,3 +1,5 @@
+import datetime
+
 import django_filters.rest_framework
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -5,6 +7,7 @@ from rest_framework.response import Response
 
 from Post.models import Post
 from Post.serializers import PostModelSerializer
+from User.services import upload_image_to_s3
 
 from .permissions import *
 from .serializers import *
@@ -12,6 +15,8 @@ from .services import (add_follow_requests_to_request_data,
                        add_user_to_page_follow_requests,
                        add_user_to_page_followers,
                        user_is_in_page_follow_requests_or_followers)
+
+ALLOWABLE_IMAGE_FORMATS = ('png', 'jpeg', 'jpg')
 
 
 class PageViewSet(viewsets.ModelViewSet):
@@ -28,7 +33,8 @@ class PageViewSet(viewsets.ModelViewSet):
         'follow_requests': (permissions.IsAuthenticated, IsPageOwnerOrModeratorOrAdmin),
         'followers': (permissions.IsAuthenticated, IsPageOwnerOrModeratorOrAdmin, PageIsntBlocked),
         'follow': (permissions.IsAuthenticated, PageIsntBlocked),
-        'posts': (permissions.IsAuthenticated, PageIsntBlocked, PageIsPublicOrFollowerOrOwnerOrModeratorOrAdmin)
+        'posts': (permissions.IsAuthenticated, PageIsntBlocked, PageIsPublicOrFollowerOrOwnerOrModeratorOrAdmin),
+        'image': (permissions.IsAuthenticated, IsPageOwnerOrModeratorOrAdmin,)
     }
 
     # a method that set permissions depending on http request methods
@@ -136,6 +142,33 @@ class PageViewSet(viewsets.ModelViewSet):
         query = Post.objects.filter(page=page)
         post_serializer = PostModelSerializer(query, many=True)
         return Response({'posts': post_serializer.data}, status.HTTP_200_OK)
+
+    @action(detail=True, methods=('post', 'get'))
+    def image(self, request, pk=None):
+        """
+        'POST' uploads new page's image, 'GET' returns link for the image
+
+        No parameters there, only file with image. Image should be in 'jpg' or 'png' format.
+        """
+        page = self.get_object()
+        if request.method == "POST":
+            image = request.data['upload']
+            img_format = image.name.split('.')[-1]
+            if img_format in ALLOWABLE_IMAGE_FORMATS:
+                image.name = f'page_{page.pk}_{datetime.datetime.now().date()}.{img_format}'
+                s3_url = upload_image_to_s3(image)
+                page.image = s3_url
+                page.save()
+                response = Response({"message": "Successfully uploaded!", "s3_url": s3_url}, status.HTTP_200_OK)
+            else:
+                response = Response({"message": "Image should be in ('.png', '.jpeg', '.jpg') format!"},
+                                    status.HTTP_400_BAD_REQUEST)
+        elif request.method == 'GET':
+            if page.image:
+                response = Response({"message": "Success!", "s3_url": page.image}, status.HTTP_200_OK)
+            else:
+                response = Response({"message": "There is no image for this page :("}, status.HTTP_400_BAD_REQUEST)
+        return response
 
 
 class TagViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.RetrieveModelMixin,

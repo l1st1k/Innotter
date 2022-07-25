@@ -2,6 +2,7 @@ import django_filters.rest_framework
 from django.contrib.auth import get_user_model
 from rest_framework import mixins, parsers, renderers, status, viewsets
 from rest_framework.authtoken.serializers import AuthTokenSerializer
+from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
@@ -10,11 +11,12 @@ from User.serializers import UserSerializer
 
 from .services import *
 
+ALLOWABLE_IMAGE_FORMATS = ('png', 'jpeg', 'jpg')
 User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """ViewSet for all User and Tokens objects"""
+    """ViewSet for all User objects"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = []
@@ -25,6 +27,7 @@ class UserViewSet(viewsets.ModelViewSet):
         'create': (permissions.AllowAny,),
         'list': (permissions.IsAuthenticated, IsAdmin,),
         'retrieve': (permissions.IsAuthenticated,),
+        'image': (permissions.IsAuthenticated, IsUserOwnerOrAdmin,)
     }
 
     # a method that set permissions depending on http request methods
@@ -34,6 +37,33 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             perms = []
         return [permission() for permission in perms]
+
+    @action(detail=True, methods=('post', 'get'))
+    def image(self, request, pk=None):
+        """
+        'POST' uploads new user's image, 'GET' returns link for the image
+
+        No parameters there, only file with avatar. Image should be in 'jpg' or 'png' format.
+        """
+        user = self.get_object()
+        if request.method == "POST":
+            image = request.data['upload']
+            img_format = image.name.split('.')[-1]
+            if img_format in ALLOWABLE_IMAGE_FORMATS:
+                image.name = f'user_{user.pk}_{datetime.datetime.now().date()}.{img_format}'
+                s3_url = upload_image_to_s3(image)
+                user.image_s3_path = s3_url
+                user.save()
+                response = Response({"message": "Successfully uploaded!", "s3_url": s3_url}, status.HTTP_200_OK)
+            else:
+                response = Response({"message": "Image should be in ('.png', '.jpeg', '.jpg') format!"},
+                                    status.HTTP_400_BAD_REQUEST)
+        elif request.method == 'GET':
+            if user.image_s3_path:
+                response = Response({"message": "Success!", "s3_url": user.image_s3_path}, status.HTTP_200_OK)
+            else:
+                response = Response({"message": "There is no image for this user :("}, status.HTTP_400_BAD_REQUEST)
+        return response
 
 
 class CreateTokenView(GenericAPIView):

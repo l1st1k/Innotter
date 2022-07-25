@@ -7,3 +7,5 @@ Innotter (Django)/.env
 db.sqlite3
 */__pycache__/
 Innotter (Django)/Innotter/__pycache__/
+.localstack
+.aws

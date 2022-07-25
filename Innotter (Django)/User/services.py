@@ -1,12 +1,28 @@
 import datetime
 
+import boto3
+import botocore
 import jwt
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
+from dotenv import dotenv_values
 
 from Innotter import settings
 from Page.models import Page
 from User.models import RefreshToken
+
+config = dotenv_values("/usr/src/app/.env")
+S3_ENDPOINT = config["S3_ENDPOINT"]
+AWS_ACCESS_KEY = config["AWS_ACCESS_KEY"]
+AWS_SECRET_ACCESS_KEY = config["AWS_SECRET_ACCESS_KEY"]
+
+
+def upload_image_to_s3(image):
+    s3 = boto3.client("s3", endpoint_url=S3_ENDPOINT, aws_access_key_id=AWS_ACCESS_KEY,
+                      aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    s3.put_object(Body=image, Bucket='innotter-storage', Key=f'{image}')
+    s3_url = 'http://localhost.localstack.cloud:4566/innotter-storage/' + f'{image}'
+    return s3_url
 
 
 def unblock_all_users_pages(user):
