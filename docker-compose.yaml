@@ -11,7 +11,7 @@ services:
     env_file:
       - Innotter (Django)/.env
     depends_on:
-      - db
+      - db, localstack
     stdin_open: true
     tty: true
 
@@ -23,5 +23,23 @@ services:
       - POSTGRES_USER=hello_django
       - POSTGRES_PASSWORD=hello_django
       - POSTGRES_DB=hello_django_dev
+
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"            # LocalStack Gateway
+    environment:
+      - AWS_DEFAULT_REGION=eu-central-1
+      - EDGE_PORT=4566
+      - SERVICES=s3,ses
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - PERSISTENCE=${PERSISTENCE-}
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - ./localstack_entrypoint.sh:/docker-entrypoint-initaws.d/localstack_entrypoint.sh
+      - './.localstack:/tmp/localstack'
+      - "/var/run/docker.sock:/var/run/docker.sock"
 volumes:
   postgres_data:

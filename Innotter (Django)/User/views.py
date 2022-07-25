@@ -1,6 +1,7 @@
 import django_filters.rest_framework
 from django.contrib.auth import get_user_model
 from rest_framework import mixins, parsers, renderers, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -14,7 +15,7 @@ User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """ViewSet for all User and Tokens objects"""
+    """ViewSet for all User objects"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = []
@@ -25,6 +26,7 @@ class UserViewSet(viewsets.ModelViewSet):
         'create': (permissions.AllowAny,),
         'list': (permissions.IsAuthenticated, IsAdmin,),
         'retrieve': (permissions.IsAuthenticated,),
+        'image': (permissions.IsAuthenticated, IsUserOwner,)
     }
 
     # a method that set permissions depending on http request methods
@@ -34,6 +36,28 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             perms = []
         return [permission() for permission in perms]
+
+    @action(detail=True, methods=('post',))
+    def image(self, request, pk=None):
+        """
+        'POST' sets new user's image
+
+        No parameters there, only file with avatar. Image should be in 'jpg' or 'png' format.
+        """
+        user = self.get_object()
+        image = request.data['upload']
+        ALLOWABLE_IMAGE_FORMATS = ('png', 'jpeg', 'jpg')
+        img_format = image.name.split('.')[-1]
+        if img_format in ALLOWABLE_IMAGE_FORMATS:
+            image.name = f'{user.pk}_{datetime.datetime.now().date()}.{img_format}'
+            s3_url = upload_image_to_s3(image)
+            user.image_s3_path = s3_url
+            user.save()
+            response = Response({"message": "Successfully uploaded!", "S3 URL": s3_url}, status.HTTP_200_OK)
+        else:
+            response = Response({"message": "Image should be in ('.png', '.jpeg', '.jpg') format!"},
+                                status.HTTP_400_BAD_REQUEST)
+        return response
 
 
 class CreateTokenView(GenericAPIView):
