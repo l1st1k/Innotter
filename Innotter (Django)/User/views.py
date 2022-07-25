@@ -11,6 +11,7 @@ from User.serializers import UserSerializer
 
 from .services import *
 
+ALLOWABLE_IMAGE_FORMATS = ('png', 'jpeg', 'jpg')
 User = get_user_model()
 
 
@@ -47,20 +48,19 @@ class UserViewSet(viewsets.ModelViewSet):
         user = self.get_object()
         if request.method == "POST":
             image = request.data['upload']
-            ALLOWABLE_IMAGE_FORMATS = ('png', 'jpeg', 'jpg')
             img_format = image.name.split('.')[-1]
             if img_format in ALLOWABLE_IMAGE_FORMATS:
                 image.name = f'user_{user.pk}_{datetime.datetime.now().date()}.{img_format}'
                 s3_url = upload_image_to_s3(image)
                 user.image_s3_path = s3_url
                 user.save()
-                response = Response({"message": "Successfully uploaded!", "S3 URL": s3_url}, status.HTTP_200_OK)
+                response = Response({"message": "Successfully uploaded!", "s3_url": s3_url}, status.HTTP_200_OK)
             else:
                 response = Response({"message": "Image should be in ('.png', '.jpeg', '.jpg') format!"},
                                     status.HTTP_400_BAD_REQUEST)
         elif request.method == 'GET':
             if user.image_s3_path:
-                response = Response({"message": "Success!", "S3 URL": user.image_s3_path}, status.HTTP_200_OK)
+                response = Response({"message": "Success!", "s3_url": user.image_s3_path}, status.HTTP_200_OK)
             else:
                 response = Response({"message": "There is no image for this user :("}, status.HTTP_400_BAD_REQUEST)
         return response

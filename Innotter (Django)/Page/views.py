@@ -16,6 +16,8 @@ from .services import (add_follow_requests_to_request_data,
                        add_user_to_page_followers,
                        user_is_in_page_follow_requests_or_followers)
 
+ALLOWABLE_IMAGE_FORMATS = ('png', 'jpeg', 'jpg')
+
 
 class PageViewSet(viewsets.ModelViewSet):
     """ViewSet for all Page objects"""
@@ -151,20 +153,19 @@ class PageViewSet(viewsets.ModelViewSet):
         page = self.get_object()
         if request.method == "POST":
             image = request.data['upload']
-            ALLOWABLE_IMAGE_FORMATS = ('png', 'jpeg', 'jpg')
             img_format = image.name.split('.')[-1]
             if img_format in ALLOWABLE_IMAGE_FORMATS:
                 image.name = f'page_{page.pk}_{datetime.datetime.now().date()}.{img_format}'
                 s3_url = upload_image_to_s3(image)
                 page.image = s3_url
                 page.save()
-                response = Response({"message": "Successfully uploaded!", "S3 URL": s3_url}, status.HTTP_200_OK)
+                response = Response({"message": "Successfully uploaded!", "s3_url": s3_url}, status.HTTP_200_OK)
             else:
                 response = Response({"message": "Image should be in ('.png', '.jpeg', '.jpg') format!"},
                                     status.HTTP_400_BAD_REQUEST)
         elif request.method == 'GET':
             if page.image:
-                response = Response({"message": "Success!", "S3 URL": page.image}, status.HTTP_200_OK)
+                response = Response({"message": "Success!", "s3_url": page.image}, status.HTTP_200_OK)
             else:
                 response = Response({"message": "There is no image for this page :("}, status.HTTP_400_BAD_REQUEST)
         return response

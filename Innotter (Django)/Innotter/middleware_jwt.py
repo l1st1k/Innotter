@@ -24,7 +24,6 @@ class JWTAuthenticationMiddleware(MiddlewareMixin):
                     data={"error": "You're blocked"},
                     status=status.HTTP_403_FORBIDDEN
                 )
-                return response
         return response
 
     @staticmethod
