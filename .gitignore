@@ -2,10 +2,10 @@
 */.idea
 venv
 */venv
-Innotter (Django)/.env
+Innotter_Django/.env
 */.env
 db.sqlite3
 */__pycache__/
-Innotter (Django)/Innotter/__pycache__/
+Innotter_Django/Innotter/__pycache__/
 .localstack
 .aws

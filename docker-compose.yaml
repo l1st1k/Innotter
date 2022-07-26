@@ -2,14 +2,14 @@ version: '3.3'
 
 services:
   web:
-    build: ./Innotter (Django)
+    build: Innotter_Django
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./Innotter (Django)/:/usr/src/app/
+      - ./Innotter_Django/:/usr/src/app/
     ports:
       - 8000:8000
     env_file:
-      - Innotter (Django)/.env
+      - Innotter_Django/.env
     depends_on:
       - db, localstack, celery
     stdin_open: true
@@ -54,11 +54,13 @@ services:
       - "15672:15672"  # here, we can access rabbitmq management plugin
 
   celery:
-    build: .
+    build: Innotter_Django
     volumes:
-      - ./Innotter (Django)/:/usr/src/app/
+      - ./Innotter_Django/:/usr/src/app/
     env_file:
-      - Innotter (Django)/.env
+      - Innotter_Django/.env
+    command:
+      - celery -A Innotter worker -l info
     depends_on:
       - rabbitmq
     restart: always
