@@ -3,7 +3,7 @@ version: '3.3'
 services:
   web:
     build: Innotter_Django
-    command: python manage.py runserver 0.0.0.0:8000
+    entrypoint: ./entrypoint.sh
     volumes:
       - ./Innotter_Django/:/usr/src/app/
     ports:
@@ -59,8 +59,7 @@ services:
       - ./Innotter_Django/:/usr/src/app/
     env_file:
       - Innotter_Django/.env
-    command:
-      - celery -A Innotter worker -l info
+    entrypoint: ./celery_entrypoint.sh
     depends_on:
       - rabbitmq
     restart: always
