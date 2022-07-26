@@ -11,7 +11,7 @@ services:
     env_file:
       - Innotter (Django)/.env
     depends_on:
-      - db, localstack
+      - db, localstack, celery
     stdin_open: true
     tty: true
 
@@ -41,5 +41,27 @@ services:
       - ./localstack_entrypoint.sh:/docker-entrypoint-initaws.d/localstack_entrypoint.sh
       - './.localstack:/tmp/localstack'
       - "/var/run/docker.sock:/var/run/docker.sock"
+
+  rabbitmq:
+    hostname: rabbit
+    container_name: "rabbitmq"
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # here, we can access rabbitmq management plugin
+
+  celery:
+    build: .
+    volumes:
+      - ./Innotter (Django)/:/usr/src/app/
+    env_file:
+      - Innotter (Django)/.env
+    depends_on:
+      - rabbitmq
+    restart: always
+
 volumes:
   postgres_data:
