@@ -18,7 +18,7 @@ psycopg2-binary==2.8.5
 pyparsing==3.0.9
 python-dateutil==2.7.3
 python-dotenv==0.20.0
-pytz==2019.3
+pytz==2021.3
 requests==2.28.1
 ruamel.yaml==0.17.21
 ruamel.yaml.clib==0.2.6
@@ -30,3 +30,5 @@ PyJWT==2.4.0
 isort==5.10.1
 boto3==1.24.0
 awscli==1.25.35
+celery==5.2.7
+librabbitmq==2.0.0

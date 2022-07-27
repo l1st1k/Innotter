@@ -1,5 +1,5 @@
 """
-ASGI config for Innotter (Django) project.
+ASGI config for Innotter_Django project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

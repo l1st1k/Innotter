@@ -3,12 +3,12 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from Page.models import Page
 from Page.permissions import *
 
 from .models import Post
 from .serializers import PostModelSerializer
 from .services import *
+from .tasks import send_emails
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -61,6 +61,7 @@ class PostViewSet(viewsets.ModelViewSet):
                 replied_post = Post.objects.get(pk=post_data['reply_to'])
             new_post = Post.objects.create(page=page, content=post_data['content'], reply_to=replied_post)
             new_post.save()
+            send_emails(new_post)
             serializer = PostModelSerializer(new_post)
             return Response(serializer.data)
         return Response({'message': 'You are not the owner of this page!'}, status.HTTP_405_METHOD_NOT_ALLOWED)
