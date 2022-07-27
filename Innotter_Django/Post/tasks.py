@@ -13,6 +13,7 @@ AWS_REGION_NAME = config["AWS_REGION_NAME"]
 
 def send_emails(post):
     mail_data = prepared_data(post)
+
     celery_send_emails.delay(*mail_data)
 
 
