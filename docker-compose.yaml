@@ -38,7 +38,7 @@ services:
       - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR-}
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
-      - ./localstack_entrypoint.sh:/docker-entrypoint-initaws.d/localstack_entrypoint.sh
+      - ./Innotter_Django/localstack_entrypoint.sh:/docker-entrypoint-initaws.d/localstack_entrypoint.sh
       - './.localstack:/tmp/localstack'
       - "/var/run/docker.sock:/var/run/docker.sock"
 
