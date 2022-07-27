@@ -1,7 +1,6 @@
 import datetime
 
 import boto3
-import botocore
 import jwt
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
