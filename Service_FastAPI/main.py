@@ -1,11 +1,14 @@
+import requests
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
-import requests
-from dotenv import dotenv_values
 
-config = dotenv_values("./.env")
-# config = dotenv_values("/usr/src/app/.env")
+
 app = FastAPI()
+
+
+class UserModel(BaseModel):
+    username: str = Field(title='Логин', max_length=30)
+    password: str = Field(title='Пароль', max_length=30)
 
 
 class StatsResponseModel(BaseModel):
@@ -51,27 +54,10 @@ def request_to_django(page_id: int, user_login: str, user_pass: str) -> dict:
         'amount_of_posts': amount_of_posts,
         'amount_of_followers': amount_of_followers,
         'amount_of_likes': amount_of_likes
-
     }
     return response
 
 
-@app.get("/api/v1/page/{page_id}/stats", response_model=StatsResponseModel, name='Page stats by ID')
-async def stats(page_id: int):
-    login = 'root'
-    password = 'z26p11s02'
-    return request_to_django(page_id, login, password)
-
-
-@app.get("/test")
-async def test():
-    """
-    works correctly
-    """
-    page_id = 5
-    cookies = get_tokens_for_cookies("root", "z26p11s02")
-    headers = {"Authorization": f"Bearer {cookies['access_token']}", "Content-Type": "application/json"}
-    response = requests.get(f"http://localhost:8000/api/v1/page/{page_id}/posts/", headers=headers, cookies=cookies)
-    a = len(response.json()['posts'])
-    print (a, type(a))
-    return response.json()
+@app.post("/api/v1/page/{page_id}/stats", response_model=StatsResponseModel, name='Page stats by ID')
+async def stats(page_id: int, user: UserModel):
+    return request_to_django(page_id, user.username, user.password)
