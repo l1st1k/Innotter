@@ -7,7 +7,7 @@ services:
     volumes:
       - ./Innotter_Django/:/usr/src/app/
     ports:
-      - 8000:8000
+      - "8000:8000"
     env_file:
       - Innotter_Django/.env
     depends_on:
@@ -19,7 +19,7 @@ services:
     build: Service_FastAPI
     entrypoint: ./fastapi_entrypoint.sh
     ports:
-      - 8080:8080
+      - "8080:8080"
     depends_on:
       - web
 
