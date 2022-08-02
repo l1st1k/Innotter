@@ -35,9 +35,8 @@ def get_amount_of_likes(posts) -> int:
     return counter
 
 
-def get_request_to_django_page(page_id: int, cookies: dict, url: str):
+def get_request_to_django(cookies: dict, url: str):
     headers = {"Authorization": f"Bearer {cookies['access_token']}", "Content-Type": "application/json"}
-    url = url.replace('{page_id}', str(page_id))
     response = requests.get(url=url, headers=headers, cookies=cookies)
     return response
 
@@ -45,16 +44,14 @@ def get_request_to_django_page(page_id: int, cookies: dict, url: str):
 @app.post("/api/v1/page/{page_id}/stats", response_model=StatsResponseModel, name='Page stats by ID')
 async def stats(page_id: int, user: UserModel):
     cookies = get_tokens_for_cookies(user.username, user.password)
-    response_name = get_request_to_django_page(page_id=page_id, cookies=cookies,
-                                               url="http://localhost:8000/api/v1/page/{page_id}/")
+    response_name = get_request_to_django(cookies=cookies, url=f"http://localhost:8000/api/v1/page/{page_id}/")
     page_name = response_name.json()["name"]
 
-    response_followers = get_request_to_django_page(page_id=page_id, cookies=cookies,
-                                                    url="http://localhost:8000/api/v1/page/{page_id}/followers/")
+    response_followers = get_request_to_django(cookies=cookies,
+                                               url=f"http://localhost:8000/api/v1/page/{page_id}/followers/")
     amount_of_followers = len(response_followers.json()['followers'])
 
-    response_posts = get_request_to_django_page(page_id=page_id, cookies=cookies,
-                                                url="http://localhost:8000/api/v1/page/{page_id}/posts/")
+    response_posts = get_request_to_django(cookies=cookies, url=f"http://localhost:8000/api/v1/page/{page_id}/posts/")
     amount_of_posts = len(response_posts.json()['posts'])
     amount_of_likes = get_amount_of_likes(response_posts.json()['posts'])
 
